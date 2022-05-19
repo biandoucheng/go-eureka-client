@@ -28,7 +28,7 @@ func Start(cnf *EurekaClientConfig) error {
 	go func() {
 		t := time.NewTicker(time.Second * time.Duration(secs))
 		for {
-			KeepMeAlive(cnf, 3)
+			keepMeAlive(cnf, 3)
 			<-t.C
 		}
 	}()
@@ -37,7 +37,7 @@ func Start(cnf *EurekaClientConfig) error {
 	go func() {
 		t := time.NewTicker(time.Second * time.Duration(cnf.AppRefreshSecs))
 		for {
-			KeepAppCache(cnf)
+			keepAppCache(cnf)
 			<-t.C
 		}
 	}()
@@ -60,7 +60,7 @@ func delteOldApp(cnf *EurekaClientConfig) {
 }
 
 // KeepMeAlive 本服务保活
-func KeepMeAlive(cnf *EurekaClientConfig, tm int64) error {
+func keepMeAlive(cnf *EurekaClientConfig, tm int64) error {
 	err := EurekaHeartBeat(cnf.EurekaServerAddress, cnf.AppName, cnf.Id())
 
 	if err == nil {
@@ -70,14 +70,14 @@ func KeepMeAlive(cnf *EurekaClientConfig, tm int64) error {
 	if tm > 0 {
 		tm -= 1
 		time.Sleep(time.Second * 3)
-		return KeepMeAlive(cnf, tm)
+		return keepMeAlive(cnf, tm)
 	}
 
 	return err
 }
 
-// KeepAppCache 应用列表维护
-func KeepAppCache(cnf *EurekaClientConfig) {
+// keepAppCache 应用列表维护
+func keepAppCache(cnf *EurekaClientConfig) {
 	for _, name := range cnf.Apps {
 		info, err := EurekaGetApp(cnf.EurekaServerAddress, name)
 		if err != nil {
