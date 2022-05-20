@@ -3,6 +3,7 @@ package goeurekaclient
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"strconv"
@@ -39,7 +40,7 @@ type EurekaAppInstance struct {
 	Status                        string                 `json:"status"`
 	Overriddenstatus              string                 `json:"overriddenstatus"`
 	LeaseInfo                     LeaseInfo              `json:"leaseInfo"`
-	IsCoordinatingDiscoveryServer bool                   `json:"isCoordinatingDiscoveryServer"`
+	IsCoordinatingDiscoveryServer string                 `json:"isCoordinatingDiscoveryServer"`
 	Metadata                      map[string]interface{} `json:"metadata"`
 	LastUpdatedTimestamp          int64                  `json:"lastUpdatedTimestamp"`
 	LastDirtyTimestamp            int64                  `json:"lastDirtyTimestamp"`
@@ -48,14 +49,14 @@ type EurekaAppInstance struct {
 
 // InstancePort 实例端口
 type InstancePort struct {
-	Enable bool `json:"@enabled"`
-	Value  int  `json:"$"`
+	Enable string `json:"@enabled"`
+	Value  int    `json:"$"`
 }
 
 // InstanceSecurePort 实例安全端口
 type InstanceSecurePort struct {
-	Enable bool `json:"@enabled"`
-	Value  int  `json:"$"`
+	Enable string `json:"@enabled"`
+	Value  int    `json:"$"`
 }
 
 // DataCenterInfo
@@ -85,6 +86,13 @@ func NewEurekaAppInstance(cnf *EurekaClientConfig) EurekaAppInstance {
 	// 毫秒时间戳
 	ms := GetMs()
 
+	porten := "true"
+	sporten := "false"
+	if cnf.InstancePort == 443 {
+		porten = "false"
+		sporten = "true"
+	}
+
 	// 实例化eureka信息
 	euk := EurekaAppInstance{
 		InstanceId:   cnf.Id(),
@@ -93,11 +101,11 @@ func NewEurekaAppInstance(cnf *EurekaClientConfig) EurekaAppInstance {
 		IpAddr:       cnf.InstanceIp,
 		Sid:          "na",
 		Port: InstancePort{
-			Enable: cnf.InstancePort != 443,
+			Enable: porten,
 			Value:  cnf.InstancePort,
 		},
 		SecurePort: InstanceSecurePort{
-			Enable: cnf.InstancePort == 443,
+			Enable: sporten,
 			Value:  443,
 		},
 		HealthCheckUrl:   cnf.InstanceHealthCheckUrl,
@@ -122,7 +130,7 @@ func NewEurekaAppInstance(cnf *EurekaClientConfig) EurekaAppInstance {
 			EvictionTimestamp:     0,
 			ServiceUpTimestamp:    0,
 		},
-		IsCoordinatingDiscoveryServer: false,
+		IsCoordinatingDiscoveryServer: "false",
 		Metadata: map[string]interface{}{
 			"@class": "java.util.Collections$EmptyMap",
 		},
@@ -134,14 +142,23 @@ func NewEurekaAppInstance(cnf *EurekaClientConfig) EurekaAppInstance {
 	return euk
 }
 
+// EurekaRegisterRequest Eureka注册请求结构
+type EurekaRegisterRequest struct {
+	Instance EurekaAppInstance `json:"instance"`
+}
+
 // EurekaRegist 注册新的服务
-func EurekaRegist(ul string, e *EurekaAppInstance) error {
-	body, err := json.Marshal(e)
+func EurekaRegist(ul string, auth string, e EurekaAppInstance) error {
+	req := EurekaRegisterRequest{
+		Instance: e,
+	}
+	body, err := json.Marshal(req)
 	if err != nil {
 		return err
 	}
 
 	header := http.Header{}
+	header.Set("Authorization", auth)
 	header.Set("Content-type", "application/json")
 	header.Set("Accept", "application/json")
 
@@ -158,9 +175,13 @@ func EurekaRegist(ul string, e *EurekaAppInstance) error {
 }
 
 // EurekaHeartBeat 心跳续约
-func EurekaHeartBeat(ul, name, id string) error {
+func EurekaHeartBeat(ul, auth, name, id string) error {
 	ul = ul + "/apps/" + name + "/" + id
-	resp, err := HttpPut(ul, nil, nil, 2)
+
+	header := http.Header{}
+	header.Set("Authorization", auth)
+
+	resp, err := HttpPut(ul, header, nil, 2)
 	if err != nil {
 		return errors.New("Eureka heartbeat failed with http err: " + err.Error())
 	}
@@ -173,9 +194,10 @@ func EurekaHeartBeat(ul, name, id string) error {
 }
 
 // EurekaGetApp 拉取应用
-func EurekaGetApp(ul, name string) (AppResponse, error) {
+func EurekaGetApp(ul, auth, name string) (AppResponse, error) {
 	ul = ul + "/apps/" + name
 	header := http.Header{}
+	header.Set("Authorization", auth)
 	header.Set("Content-type", "application/json")
 	header.Set("Accept", "application/json")
 
@@ -186,7 +208,7 @@ func EurekaGetApp(ul, name string) (AppResponse, error) {
 		return app, errors.New("Eureka app get failed with http err: " + err.Error())
 	}
 
-	if resp.StatusCode != 204 {
+	if resp.StatusCode != 200 {
 		return app, errors.New("Eureka app get failed with http code " + strconv.Itoa(resp.StatusCode))
 	}
 
@@ -195,18 +217,23 @@ func EurekaGetApp(ul, name string) (AppResponse, error) {
 		return app, errors.New("Eureka app get failed with read err: " + err.Error())
 	}
 
+	fmt.Println("应用信息 >>>", string(body))
 	err = json.Unmarshal(body, &app)
 	if err != nil {
-		return app, errors.New("Eureka app get failed with jsoon err: " + err.Error())
+		return app, errors.New("Eureka app get failed with json err: " + err.Error())
 	}
 
 	return app, nil
 }
 
 // EurekaDelteApp 删除已注册的应用实例
-func EurekaDelteApp(ul, name, id string) error {
+func EurekaDelteApp(ul, auth, name, id string) error {
 	ul = ul + "/apps/" + name + "/" + id
-	resp, err := HttpDelete(ul, nil, nil, 2)
+
+	header := http.Header{}
+	header.Set("Authorization", auth)
+
+	resp, err := HttpDelete(ul, header, nil, 2)
 	if err != nil {
 		return errors.New("Eureka detete app failed with http err: " + err.Error())
 	}

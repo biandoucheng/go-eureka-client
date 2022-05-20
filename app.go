@@ -3,7 +3,12 @@ package goeurekaclient
 import (
 	"errors"
 	"math/rand"
+	"time"
 )
+
+func init() {
+	rand.Seed(time.Now().UnixNano())
+}
 
 // AppObject 应用信息
 type AppObject struct {

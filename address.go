@@ -11,7 +11,6 @@ type AddressObject struct {
 	Host      string // 主机地址
 	Port      string // 服务端口
 	HealthUrl string // 健康接口地址
-	Ok        bool   // 是否可用
 }
 
 // NewAddress 实例化一个地址对象
@@ -33,7 +32,7 @@ func NewAddress(name, scheme, host, port, healthUrl string) AddressObject {
 	}
 
 	if !strings.Contains(addr.HealthUrl, addr.Host) && strings.HasPrefix(addr.HealthUrl, "/") {
-		addr.HealthUrl = addr.Scheme + "://" + addr.Host + "/" + strings.TrimLeft(addr.HealthUrl, "/")
+		addr.HealthUrl = addr.Scheme + "://" + addr.Host + ":" + addr.Port + "/" + strings.TrimLeft(addr.HealthUrl, "/")
 	}
 
 	return addr

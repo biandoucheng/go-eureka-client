@@ -14,7 +14,7 @@ type EurekaAppCache struct {
 }
 
 // 定义全局应用维护列表
-var GlobalEurekaAppCache = EurekaAppCache{
+var globalEurekaAppCache = EurekaAppCache{
 	Apps: map[string]AppObject{},
 }
 
@@ -31,7 +31,7 @@ func (e *EurekaAppCache) Save(info EurekaAppInfo) {
 		port := ins.Port.Value
 		host := ins.HostName
 
-		if ins.SecurePort.Enable {
+		if ins.SecurePort.Enable == "true" {
 			schema = "https"
 			port = ins.SecurePort.Value
 		}
@@ -82,7 +82,7 @@ func (e *EurekaAppCache) ClearUseless() {
 func GetAppUrl(name string) (string, error) {
 	name = strings.ToUpper(name)
 
-	app, ok := GlobalEurekaAppCache.Apps[name]
+	app, ok := globalEurekaAppCache.Apps[name]
 	if !ok {
 		return "", errors.New("Get app url failed with err: app (" + name + ") not found")
 	}

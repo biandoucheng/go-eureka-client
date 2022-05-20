@@ -7,6 +7,7 @@ import (
 // EurekaClientConfig Eureka客户端配置项
 type EurekaClientConfig struct {
 	EurekaServerAddress    string   // Eureka服务端接口地址
+	Authorization          string   // Http Auth授权信息
 	Apps                   []string // 需要的服务名列表
 	AppName                string   // 本服务名称
 	InstanceDomain         string   // 本服务的域名地址 | 置空
@@ -33,12 +34,32 @@ func (e *EurekaClientConfig) HostName() string {
 	return e.InstanceDomain
 }
 
+// RefreshLocalIp 刷新本地IP信息
+func (e *EurekaClientConfig) RefreshLocalIp() {
+	oip := e.InstanceIp
+	e.InstanceIp = GetInnerIp()
+	if len(e.InstanceDomain) == 0 || e.InstanceDomain == oip {
+		e.InstanceDomain = e.InstanceIp
+	}
+}
+
 // GlobalEurekaClientConf 全局Eureka客户端配置
 var DefaultEurekaClientConf = EurekaClientConfig{
 	RenewalIntervalInSecs:  20,
 	DurationInSecs:         40,
 	AppRefreshSecs:         30,
 	InstanceHealthCheckUrl: "/health",
+}
+
+// NewEurekaConf 实例化一个eureka客户端配置
+func NewEurekaConf() EurekaClientConfig {
+	return EurekaClientConfig{
+		RenewalIntervalInSecs:  20,
+		DurationInSecs:         40,
+		AppRefreshSecs:         30,
+		InstanceHealthCheckUrl: "/health",
+		InstanceIp:             GetInnerIp(),
+	}
 }
 
 func init() {

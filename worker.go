@@ -1,6 +1,9 @@
 package goeurekaclient
 
-import "time"
+import (
+	"fmt"
+	"time"
+)
 
 // Start 启动
 func Start(cnf *EurekaClientConfig) error {
@@ -14,7 +17,7 @@ func Start(cnf *EurekaClientConfig) error {
 	delteOldApp(cnf)
 
 	// 注册新的应用
-	err := EurekaRegist(cnf.EurekaServerAddress, &eureka)
+	err := EurekaRegist(cnf.EurekaServerAddress, cnf.Authorization, eureka)
 	if err != nil {
 		return err
 	}
@@ -25,10 +28,16 @@ func Start(cnf *EurekaClientConfig) error {
 		secs -= 5
 	}
 
+	// 计算心跳续约失败后的重试次数
+	tims := cnf.RenewalIntervalInSecs / 2
+	if tims <= 0 {
+		tims = 1
+	}
+
 	go func() {
 		t := time.NewTicker(time.Second * time.Duration(secs))
 		for {
-			keepMeAlive(cnf, 3)
+			keepMeAlive(cnf, tims)
 			<-t.C
 		}
 	}()
@@ -47,7 +56,7 @@ func Start(cnf *EurekaClientConfig) error {
 
 // delteOldApp 删除旧应用
 func delteOldApp(cnf *EurekaClientConfig) {
-	info, err := EurekaGetApp(cnf.EurekaServerAddress, cnf.AppName)
+	info, err := EurekaGetApp(cnf.EurekaServerAddress, cnf.Authorization, cnf.AppName)
 	if err != nil {
 		return
 	}
@@ -55,35 +64,39 @@ func delteOldApp(cnf *EurekaClientConfig) {
 	app := info.Application
 
 	for _, ins := range app.Instance {
-		EurekaDelteApp(cnf.EurekaServerAddress, cnf.AppName, ins.InstanceId)
+		EurekaDelteApp(cnf.EurekaServerAddress, cnf.Authorization, cnf.AppName, ins.InstanceId)
 	}
 }
 
 // KeepMeAlive 本服务保活
 func keepMeAlive(cnf *EurekaClientConfig, tm int64) error {
-	err := EurekaHeartBeat(cnf.EurekaServerAddress, cnf.AppName, cnf.Id())
+	err := EurekaHeartBeat(cnf.EurekaServerAddress, cnf.Authorization, cnf.AppName, cnf.Id())
 
 	if err == nil {
 		return nil
 	}
 
+	// 续命失败,可能时网络问题,重试
 	if tm > 0 {
 		tm -= 1
-		time.Sleep(time.Second * 3)
+		time.Sleep(time.Second * 2)
 		return keepMeAlive(cnf, tm)
 	}
 
-	return err
+	// 频繁注册失败,尝试无果,重新注册
+	e := NewEurekaAppInstance(cnf)
+	return EurekaRegist(cnf.EurekaServerAddress, cnf.Authorization, e)
 }
 
 // keepAppCache 应用列表维护
 func keepAppCache(cnf *EurekaClientConfig) {
 	for _, name := range cnf.Apps {
-		info, err := EurekaGetApp(cnf.EurekaServerAddress, name)
+		info, err := EurekaGetApp(cnf.EurekaServerAddress, cnf.Authorization, name)
 		if err != nil {
+			fmt.Println("拉取应用信息错误 >>>", err)
 			continue
 		}
 
-		GlobalEurekaAppCache.Save(info.Application)
+		globalEurekaAppCache.Save(info.Application)
 	}
 }
