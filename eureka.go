@@ -3,7 +3,6 @@ package goeurekaclient
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"strconv"
@@ -217,7 +216,6 @@ func EurekaGetApp(ul, auth, name string) (AppResponse, error) {
 		return app, errors.New("Eureka app get failed with read err: " + err.Error())
 	}
 
-	fmt.Println("应用信息 >>>", string(body))
 	err = json.Unmarshal(body, &app)
 	if err != nil {
 		return app, errors.New("Eureka app get failed with json err: " + err.Error())

@@ -1,7 +1,6 @@
 package goeurekaclient
 
 import (
-	"fmt"
 	"time"
 )
 
@@ -93,7 +92,6 @@ func keepAppCache(cnf *EurekaClientConfig) {
 	for _, name := range cnf.Apps {
 		info, err := EurekaGetApp(cnf.EurekaServerAddress, cnf.Authorization, name)
 		if err != nil {
-			fmt.Println("拉取应用信息错误 >>>", err)
 			continue
 		}
 
