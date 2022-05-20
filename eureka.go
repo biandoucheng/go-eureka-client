@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strconv"
+	"strings"
 )
 
 // AppResponse Eureka响应应用信息
@@ -156,6 +157,7 @@ func EurekaRegist(ul string, auth string, e EurekaAppInstance) error {
 	header.Set("Content-type", "application/json")
 	header.Set("Accept", "application/json")
 
+	ul = strings.TrimRight("/", ul) + "/apps/" + e.App
 	resp, err := HttpPost(ul, header, body, 3)
 	if err != nil {
 		return errors.New("Eureka regist failed with http err: " + err.Error())
@@ -170,7 +172,7 @@ func EurekaRegist(ul string, auth string, e EurekaAppInstance) error {
 
 // EurekaHeartBeat 心跳续约
 func EurekaHeartBeat(ul, auth, name, id string) error {
-	ul = ul + "/apps/" + name + "/" + id
+	ul = strings.TrimRight("/", ul) + "/apps/" + name + "/" + id
 
 	header := http.Header{}
 	header.Set("Authorization", auth)
@@ -189,7 +191,7 @@ func EurekaHeartBeat(ul, auth, name, id string) error {
 
 // EurekaGetApp 拉取应用
 func EurekaGetApp(ul, auth, name string) (AppResponse, error) {
-	ul = ul + "/apps/" + name
+	ul = strings.TrimRight("/", ul) + "/apps/" + name
 	header := http.Header{}
 	header.Set("Authorization", auth)
 	header.Set("Content-type", "application/json")
@@ -221,7 +223,7 @@ func EurekaGetApp(ul, auth, name string) (AppResponse, error) {
 
 // EurekaDelteApp 删除已注册的应用实例
 func EurekaDelteApp(ul, auth, name, id string) error {
-	ul = ul + "/apps/" + name + "/" + id
+	ul = strings.TrimRight("/", ul) + "/apps/" + name + "/" + id
 
 	header := http.Header{}
 	header.Set("Authorization", auth)
