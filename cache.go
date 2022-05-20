@@ -20,11 +20,13 @@ var globalEurekaAppCache = EurekaAppCache{
 
 // Save 存储应用信息
 func (e *EurekaAppCache) Save(info EurekaAppInfo) {
-	name := strings.ToUpper(info.Name)
-	app, ok := e.Apps[name]
-	if !ok {
-		app = NewApp(name)
+	// 如果没有拿到新的实例列表,则保留旧的列表不动
+	if len(info.Instance) == 0 {
+		return
 	}
+
+	name := strings.ToUpper(info.Name)
+	app := NewApp(name)
 
 	for _, ins := range info.Instance {
 		schema := "http"
