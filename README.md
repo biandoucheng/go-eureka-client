@@ -41,4 +41,5 @@ Eureka客户端
 ## 启动方案
 ### 使用启动方案会自动去注册,续约,应用列表维护 你只需要配置好 EurekaClientConfig 传入启动方法 Start() 即可
 - 配置 EurekaClientConfig
-- 启动 Start
+- 启动单个Eureka服务 Start
+- 启动多个Eureka服务 StartBatch

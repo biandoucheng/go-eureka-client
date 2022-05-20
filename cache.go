@@ -19,13 +19,15 @@ var globalEurekaAppCache = EurekaAppCache{
 }
 
 // Save 存储应用信息
-func (e *EurekaAppCache) Save(info EurekaAppInfo) {
+func (e *EurekaAppCache) Save(cfname string, info EurekaAppInfo) {
 	// 如果没有拿到新的实例列表,则保留旧的列表不动
 	if len(info.Instance) == 0 {
 		return
 	}
 
 	name := strings.ToUpper(info.Name)
+	cfname = strings.ToUpper(cfname)
+	kname := cfname + "_" + name
 	app := NewApp(name)
 
 	for _, ins := range info.Instance {
@@ -43,7 +45,7 @@ func (e *EurekaAppCache) Save(info EurekaAppInfo) {
 
 	defer e.L.Unlock()
 	e.L.Lock()
-	e.Apps[name] = app
+	e.Apps[kname] = app
 }
 
 // ClearAdderss 清除应用下无用的地址
@@ -81,10 +83,12 @@ func (e *EurekaAppCache) ClearUseless() {
 }
 
 // GetAppUrl 获取一个应用的请求地址
-func GetAppUrl(name string) (string, error) {
+func GetAppUrl(cfname string, name string) (string, error) {
 	name = strings.ToUpper(name)
+	cfname = strings.ToUpper(cfname)
+	kname := cfname + "_" + name
 
-	app, ok := globalEurekaAppCache.Apps[name]
+	app, ok := globalEurekaAppCache.Apps[kname]
 	if !ok {
 		return "", errors.New("Get app url failed with err: app (" + name + ") not found")
 	}

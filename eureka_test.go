@@ -28,7 +28,7 @@ func TestApp(t *testing.T) {
 }
 
 func TestEurekaConf(t *testing.T) {
-	cnf := NewEurekaConf()
+	cnf := NewEurekaConf("default")
 	cnf.EurekaServerAddress = "http://127.0.0.1:8080"
 	cnf.Apps = []string{"DEFAULT-EUREKA-APP0", "DEFAULT-EUREKA-APP1"}
 	cnf.InstanceIp = "127.0.0.1"
@@ -40,7 +40,7 @@ func TestEurekaConf(t *testing.T) {
 }
 
 func TestEurekaRegister(t *testing.T) {
-	cnf := NewEurekaConf()
+	cnf := NewEurekaConf("default")
 	cnf.AppName = "DEFAULT-EUREKA-APP8"
 	cnf.Authorization = "Basic cm9vdDpyb290"
 	cnf.EurekaServerAddress = "http://127.0.0.1:8080"
@@ -55,7 +55,7 @@ func TestEurekaRegister(t *testing.T) {
 }
 
 func TestEurekaHeartBeat(t *testing.T) {
-	cnf := NewEurekaConf()
+	cnf := NewEurekaConf("default")
 	cnf.AppName = "DEFAULT-EUREKA-APP8"
 	cnf.Authorization = "Basic cm9vdDpyb290"
 	cnf.EurekaServerAddress = "http://127.0.0.1:8080"
@@ -71,7 +71,7 @@ func TestEurekaHeartBeat(t *testing.T) {
 }
 
 func TestEurekaApps(t *testing.T) {
-	cnf := NewEurekaConf()
+	cnf := NewEurekaConf("default")
 	cnf.AppName = "DEFAULT-EUREKA-APP8"
 	cnf.Authorization = "Basic cm9vdDpyb290"
 	cnf.EurekaServerAddress = "http://127.0.0.1:8080"
@@ -86,7 +86,7 @@ func TestEurekaApps(t *testing.T) {
 }
 
 func TestEurekaDeleteApp(t *testing.T) {
-	cnf := NewEurekaConf()
+	cnf := NewEurekaConf("default")
 	cnf.AppName = "DEFAULT-EUREKA-APP8"
 	cnf.Authorization = "Basic cm9vdDpyb290"
 	cnf.EurekaServerAddress = "http://127.0.0.1:8080"
@@ -99,7 +99,7 @@ func TestEurekaDeleteApp(t *testing.T) {
 }
 
 func TestEurekaAppsCache(t *testing.T) {
-	cnf := NewEurekaConf()
+	cnf := NewEurekaConf("default")
 	cnf.AppName = "DEFAULT-EUREKA-APP8"
 	cnf.Authorization = "Basic cm9vdDpyb290"
 	cnf.EurekaServerAddress = "http://127.0.0.1:8080"
@@ -112,7 +112,28 @@ func TestEurekaAppsCache(t *testing.T) {
 	fmt.Println("Eureka客户端服务启动错误信息 >>", err)
 
 	time.Sleep(time.Second * 10)
-	ul, err := GetAppUrl("DEFAULT-EUREKA-APP0")
+	ul, err := GetAppUrl(cnf.EurekaName, "DEFAULT-EUREKA-APP0")
+	fmt.Println("获取应用服务地址错误信息 >>", err)
+	fmt.Println("获取应用服务地址 >>", ul)
+	fmt.Println("获取应用服务地址 >>", ul)
+	fmt.Println("获取应用服务地址 >>", ul)
+}
+
+func TestEurekaBatch(t *testing.T) {
+	cnf := NewEurekaConf("default")
+	cnf.AppName = "DEFAULT-EUREKA-APP9"
+	cnf.Authorization = "Basic cm9vdDpyb290"
+	cnf.EurekaServerAddress = "http://127.0.0.1:8080"
+	cnf.Apps = []string{"DEFAULT-EUREKA-APP0", "DEFAULT-EUREKA-APP1"}
+	cnf.InstanceIp = "127.0.0.1"
+	cnf.InstancePort = 8190
+
+	cnfs := []EurekaClientConfig{cnf}
+	err := StartBatch(cnfs)
+	fmt.Println("-----------Eureka客户端服务批量启动测试----------------")
+	fmt.Println("Eureka客户端服务批量启动错误信息 >>", err)
+	time.Sleep(time.Second * 10)
+	ul, err := GetAppUrl(cnf.EurekaName, "DEFAULT-EUREKA-APP0")
 	fmt.Println("获取应用服务地址错误信息 >>", err)
 	fmt.Println("获取应用服务地址 >>", ul)
 	fmt.Println("获取应用服务地址 >>", ul)
