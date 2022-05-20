@@ -76,12 +76,7 @@ type LeaseInfo struct {
 }
 
 // NewEurekaAppInstance 实例化一个Eureka实例
-func NewEurekaAppInstance(cnf *EurekaClientConfig) EurekaAppInstance {
-	// 没有提供新的配置,就使用默认配置
-	if cnf == nil {
-		cnf = &DefaultEurekaClientConf
-	}
-
+func NewEurekaAppInstance(cnf EurekaClientConfig) EurekaAppInstance {
 	// 毫秒时间戳
 	ms := GetMs()
 

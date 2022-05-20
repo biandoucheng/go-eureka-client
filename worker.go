@@ -5,11 +5,7 @@ import (
 )
 
 // Start 启动
-func Start(cnf *EurekaClientConfig) error {
-	if cnf == nil {
-		cnf = &DefaultEurekaClientConf
-	}
-
+func Start(cnf EurekaClientConfig) error {
 	eureka := NewEurekaAppInstance(cnf)
 
 	// 删除旧应用
@@ -54,7 +50,7 @@ func Start(cnf *EurekaClientConfig) error {
 }
 
 // delteOldApp 删除旧应用
-func delteOldApp(cnf *EurekaClientConfig) {
+func delteOldApp(cnf EurekaClientConfig) {
 	info, err := EurekaGetApp(cnf.EurekaServerAddress, cnf.Authorization, cnf.AppName)
 	if err != nil {
 		return
@@ -68,7 +64,7 @@ func delteOldApp(cnf *EurekaClientConfig) {
 }
 
 // KeepMeAlive 本服务保活
-func keepMeAlive(cnf *EurekaClientConfig, tm int64) error {
+func keepMeAlive(cnf EurekaClientConfig, tm int64) error {
 	err := EurekaHeartBeat(cnf.EurekaServerAddress, cnf.Authorization, cnf.AppName, cnf.Id())
 
 	if err == nil {
@@ -88,7 +84,7 @@ func keepMeAlive(cnf *EurekaClientConfig, tm int64) error {
 }
 
 // keepAppCache 应用列表维护
-func keepAppCache(cnf *EurekaClientConfig) {
+func keepAppCache(cnf EurekaClientConfig) {
 	for _, name := range cnf.Apps {
 		info, err := EurekaGetApp(cnf.EurekaServerAddress, cnf.Authorization, name)
 		if err != nil {
