@@ -42,8 +42,8 @@ type EurekaAppInstance struct {
 	LeaseInfo                     LeaseInfo              `json:"leaseInfo"`
 	IsCoordinatingDiscoveryServer string                 `json:"isCoordinatingDiscoveryServer"`
 	Metadata                      map[string]interface{} `json:"metadata"`
-	LastUpdatedTimestamp          int64                  `json:"lastUpdatedTimestamp"`
-	LastDirtyTimestamp            int64                  `json:"lastDirtyTimestamp"`
+	LastUpdatedTimestamp          string                 `json:"lastUpdatedTimestamp"`
+	LastDirtyTimestamp            string                 `json:"lastDirtyTimestamp"`
 	ActionType                    string                 `json:"actionType"`
 }
 
@@ -80,6 +80,7 @@ type LeaseInfo struct {
 func NewEurekaAppInstance(cnf EurekaClientConfig) EurekaAppInstance {
 	// 毫秒时间戳
 	ms := GetMs()
+	s_ms := strconv.FormatInt(ms, 10)
 
 	porten := "true"
 	sporten := "false"
@@ -129,8 +130,8 @@ func NewEurekaAppInstance(cnf EurekaClientConfig) EurekaAppInstance {
 		Metadata: map[string]interface{}{
 			"@class": "java.util.Collections$EmptyMap",
 		},
-		LastUpdatedTimestamp: ms,
-		LastDirtyTimestamp:   ms,
+		LastUpdatedTimestamp: s_ms,
+		LastDirtyTimestamp:   s_ms,
 		ActionType:           "ADDED",
 	}
 
