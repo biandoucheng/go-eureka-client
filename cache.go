@@ -2,6 +2,7 @@ package goeurekaclient
 
 import (
 	"errors"
+	"fmt"
 	"strconv"
 	"strings"
 	"sync"
@@ -99,4 +100,9 @@ func GetAppUrl(cfname string, name string) (string, error) {
 	}
 
 	return ul, nil
+}
+
+// ShowApps 展示已缓存的应用信息
+func ShowApps() {
+	fmt.Printf("%v", globalEurekaAppCache.Apps)
 }
