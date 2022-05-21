@@ -47,6 +47,7 @@ func (e *EurekaClientConfig) RefreshLocalIp() {
 // NewEurekaConf 实例化一个eureka客户端配置
 func NewEurekaConf(name string) EurekaClientConfig {
 	return EurekaClientConfig{
+		EurekaName:             name,
 		RenewalIntervalInSecs:  20,
 		DurationInSecs:         40,
 		AppRefreshSecs:         30,
