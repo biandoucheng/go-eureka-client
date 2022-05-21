@@ -107,7 +107,7 @@ func TestEurekaAppsCache(t *testing.T) {
 	cnf.InstanceIp = "127.0.0.1"
 	cnf.InstancePort = 8090
 
-	err := Start(cnf)
+	err := Start(cnf, true)
 	fmt.Println("-----------Eureka客户端服务启动测试----------------")
 	fmt.Println("Eureka客户端服务启动错误信息 >>", err)
 
@@ -129,7 +129,7 @@ func TestEurekaBatch(t *testing.T) {
 	cnf.InstancePort = 8190
 
 	cnfs := []EurekaClientConfig{cnf}
-	err := StartBatch(cnfs)
+	err := StartBatch(cnfs, true)
 	fmt.Println("-----------Eureka客户端服务批量启动测试----------------")
 	fmt.Println("Eureka客户端服务批量启动错误信息 >>", err)
 	time.Sleep(time.Second * 10)

@@ -1,6 +1,7 @@
 package goeurekaclient
 
 import (
+	"fmt"
 	"sync"
 	"time"
 )
@@ -11,7 +12,7 @@ var (
 )
 
 // StartBatch 批量启动
-func StartBatch(cnfs []EurekaClientConfig) error {
+func StartBatch(cnfs []EurekaClientConfig, debug bool) error {
 	for _, cnf := range cnfs {
 		eureka := NewEurekaAppInstance(cnf)
 
@@ -21,6 +22,9 @@ func StartBatch(cnfs []EurekaClientConfig) error {
 		// 注册新的应用
 		err := EurekaRegist(cnf.EurekaServerAddress, cnf.Authorization, eureka)
 		if err != nil {
+			if debug {
+				fmt.Println("Eureka Client StartBatch error: " + err.Error())
+			}
 			return err
 		}
 
@@ -46,13 +50,13 @@ func StartBatch(cnfs []EurekaClientConfig) error {
 	}
 
 	// 批量应用列表维护
-	keepAppCacheBatch(cnfs)
+	keepAppCacheBatch(cnfs, debug)
 
 	return nil
 }
 
 // Start 启动
-func Start(cnf EurekaClientConfig) error {
+func Start(cnf EurekaClientConfig, debug bool) error {
 	eureka := NewEurekaAppInstance(cnf)
 
 	// 删除旧应用
@@ -61,6 +65,9 @@ func Start(cnf EurekaClientConfig) error {
 	// 注册新的应用
 	err := EurekaRegist(cnf.EurekaServerAddress, cnf.Authorization, eureka)
 	if err != nil {
+		if debug {
+			fmt.Println("Eureka Client Start error: " + err.Error())
+		}
 		return err
 	}
 
@@ -88,7 +95,7 @@ func Start(cnf EurekaClientConfig) error {
 	go func(cf EurekaClientConfig) {
 		t := time.NewTicker(time.Second * time.Duration(cnf.AppRefreshSecs))
 		for {
-			keepAppCache(cf)
+			keepAppCache(cf, debug)
 			<-t.C
 		}
 	}(cnf)
@@ -131,10 +138,13 @@ func keepMeAlive(cnf EurekaClientConfig, tm int64) error {
 }
 
 // keepAppCache 应用列表维护
-func keepAppCache(cnf EurekaClientConfig) {
+func keepAppCache(cnf EurekaClientConfig, debug bool) {
 	for _, name := range cnf.Apps {
 		info, err := EurekaGetApp(cnf.EurekaServerAddress, cnf.Authorization, name)
 		if err != nil {
+			if debug {
+				fmt.Println("Eureka Client EurekaGetApp error: " + err.Error())
+			}
 			continue
 		}
 
@@ -143,13 +153,13 @@ func keepAppCache(cnf EurekaClientConfig) {
 }
 
 // keepAppCacheBatch 批量应用列表维护
-func keepAppCacheBatch(cnfs []EurekaClientConfig) {
+func keepAppCacheBatch(cnfs []EurekaClientConfig, debug bool) {
 	waitGroup := sync.WaitGroup{}
 	for _, cnf := range cnfs {
 		ch <- 1
 		waitGroup.Add(1)
 
-		go keepAppCache(cnf)
+		go keepAppCache(cnf, debug)
 
 		waitGroup.Done()
 		<-ch
