@@ -16,8 +16,10 @@ func StartBatch(cnfs []EurekaClientConfig, debug bool) error {
 	for _, cnf := range cnfs {
 		eureka := NewEurekaAppInstance(cnf)
 
-		// 删除旧应用
-		delteOldApp(cnf)
+		// 单机运行时清除其他旧应用
+		if cnf.StandAlone {
+			delteOldApp(cnf)
+		}
 
 		// 注册新的应用
 		err := EurekaRegist(cnf.EurekaServerAddress, cnf.Authorization, eureka)

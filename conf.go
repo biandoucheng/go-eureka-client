@@ -20,6 +20,7 @@ type EurekaClientConfig struct {
 	RenewalIntervalInSecs  int64    // 本服务的心跳周期 单位秒
 	DurationInSecs         int64    // 本服务的心跳失约后,注册信息保留时长,超时删除注册信息 单位秒
 	AppRefreshSecs         int64    // 需要的应用列表里的应用服务信息刷新间隔 单位秒
+	StandAlone             bool     // 是否是单机运行
 }
 
 // Id 生成实例ID
