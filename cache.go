@@ -102,6 +102,25 @@ func GetAppUrl(cfname string, name string) (string, error) {
 	return ul, nil
 }
 
+// GetHost 获取一个应用实例的主机信息
+func GetAppHost(cfname string, name string) (AddressObject, error) {
+	name = strings.ToUpper(name)
+	cfname = strings.ToUpper(cfname)
+	kname := cfname + "_" + name
+
+	app, ok := globalEurekaAppCache.Apps[kname]
+	if !ok {
+		return AddressObject{}, errors.New("Get app url failed with err: app (" + name + ") not found")
+	}
+
+	adr, err := app.GetAnHost()
+	if err != nil {
+		return AddressObject{}, err
+	}
+
+	return adr, nil
+}
+
 // ShowApps 展示已缓存的应用信息
 func ShowApps() {
 	fmt.Printf("%v", globalEurekaAppCache.Apps)
