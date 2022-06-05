@@ -76,3 +76,15 @@ func (a *AppObject) GetAnUrl() (string, error) {
 
 	return addr.GetUrl(), nil
 }
+
+// GetAnHost 获取一个主机信息
+func (a *AppObject) GetAnHost() (AddressObject, error) {
+	if len(a.Hosts) == 0 {
+		return AddressObject{}, errors.New("Get app(" + a.Name + ") address failed with err: no adders cached")
+	}
+
+	index := rand.Intn(len(a.Hosts))
+	addr := a.Hosts[index]
+
+	return addr, nil
+}
