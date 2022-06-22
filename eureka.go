@@ -161,11 +161,11 @@ func EurekaRegist(ul string, auth string, e EurekaAppInstance) error {
 	ul = strings.TrimRight(ul, "/") + "/apps/" + e.App
 	resp, err := HttpPost(ul, header, body, 3)
 	if err != nil {
-		return errors.New("Eureka regist failed with http err: " + err.Error())
+		return errors.New("Eureka regist failed with http err: " + err.Error() + " ul:" + ul)
 	}
 
 	if resp.StatusCode != 204 {
-		return errors.New("Eureka regist failed with http code " + strconv.Itoa(resp.StatusCode))
+		return errors.New("Eureka regist failed with http code " + strconv.Itoa(resp.StatusCode) + " ul:" + ul)
 	}
 
 	return nil
@@ -180,11 +180,11 @@ func EurekaHeartBeat(ul, auth, name, id string) error {
 
 	resp, err := HttpPut(ul, header, nil, 2)
 	if err != nil {
-		return errors.New("Eureka heartbeat failed with http err: " + err.Error())
+		return errors.New("Eureka heartbeat failed with http err: " + err.Error() + " ul:" + ul)
 	}
 
 	if resp.StatusCode != 200 {
-		return errors.New("Eureka heartbeat failed with http code: " + strconv.Itoa(resp.StatusCode))
+		return errors.New("Eureka heartbeat failed with http code: " + strconv.Itoa(resp.StatusCode) + " ul:" + ul)
 	}
 
 	return nil
@@ -206,17 +206,17 @@ func EurekaGetApp(ul, auth, name string) (AppResponse, error) {
 	}
 
 	if resp.StatusCode != 200 {
-		return app, errors.New("Eureka app get failed with http code " + strconv.Itoa(resp.StatusCode))
+		return app, errors.New("Eureka app get failed with http code " + strconv.Itoa(resp.StatusCode) + " ul:" + ul)
 	}
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return app, errors.New("Eureka app get failed with read err: " + err.Error())
+		return app, errors.New("Eureka app get failed with read err: " + err.Error() + " ul:" + ul)
 	}
 
 	err = json.Unmarshal(body, &app)
 	if err != nil {
-		return app, errors.New("Eureka app get failed with json err: " + err.Error())
+		return app, errors.New("Eureka app get failed with json err: " + err.Error() + " ul:" + ul)
 	}
 
 	return app, nil
@@ -231,11 +231,11 @@ func EurekaDelteApp(ul, auth, name, id string) error {
 
 	resp, err := HttpDelete(ul, header, nil, 2)
 	if err != nil {
-		return errors.New("Eureka detete app failed with http err: " + err.Error())
+		return errors.New("Eureka detete app failed with http err: " + err.Error() + " ul:" + ul)
 	}
 
 	if resp.StatusCode != 200 {
-		return errors.New("Eureka detete app failed with http code: " + strconv.Itoa(resp.StatusCode))
+		return errors.New("Eureka detete app failed with http code: " + strconv.Itoa(resp.StatusCode) + " ul:" + ul)
 	}
 
 	return nil
