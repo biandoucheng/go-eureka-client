@@ -121,17 +121,15 @@ func delteOldApp(cnf EurekaClientConfig) {
 
 // KeepMeAlive 本服务保活
 func keepMeAlive(cnf EurekaClientConfig, tm int64) error {
-	err := EurekaHeartBeat(cnf.EurekaServerAddress, cnf.Authorization, cnf.AppName, cnf.Id())
+	for i := int64(0); i < tm; i++ {
+		err := EurekaHeartBeat(cnf.EurekaServerAddress, cnf.Authorization, cnf.AppName, cnf.Id())
 
-	if err == nil {
-		return nil
-	}
+		if err == nil {
+			return nil
+		}
 
-	// 续命失败,可能时网络问题,重试
-	if tm > 0 {
-		tm -= 1
+		// 续命失败,可能时网络问题,重试
 		time.Sleep(time.Second * 2)
-		return keepMeAlive(cnf, tm)
 	}
 
 	// 频繁注册失败,尝试无果,重新注册
