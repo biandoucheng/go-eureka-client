@@ -105,6 +105,24 @@ func Start(cnf EurekaClientConfig, debug bool) error {
 	return nil
 }
 
+// 仅维护应用列表而启动
+func StartForKeeper(cnf EurekaClientConfig, debug bool) {
+	// 启动应用列表缓存表维护
+	go func(cf EurekaClientConfig) {
+		t := time.NewTicker(time.Second * time.Duration(cnf.AppRefreshSecs))
+		for {
+			keepAppCache(cf, debug)
+			<-t.C
+		}
+	}(cnf)
+}
+
+// 	批量仅维护应用列表而启动
+func StartForKeeperBatch(cnfs []EurekaClientConfig, debug bool) {
+	// 批量应用列表维护
+	keepAppCacheBatch(cnfs, debug)
+}
+
 // delteOldApp 删除旧应用
 func delteOldApp(cnf EurekaClientConfig) {
 	info, err := EurekaGetApp(cnf.EurekaServerAddress, cnf.Authorization, cnf.AppName)
