@@ -8,20 +8,19 @@ import (
 	"sync"
 )
 
-// EurekaAppCache Eureka服务下应用列表缓存
-type EurekaAppCache struct {
-	L    sync.RWMutex         // 读写锁
-	Apps map[string]AppObject // 维护的应用信息列表
-}
-
-// 定义全局应用维护列表
+// globalEurekaAppCache
 var globalEurekaAppCache = EurekaAppCache{
 	Apps: map[string]AppObject{},
 }
 
-// Save 存储应用信息
+// EurekaAppCache
+type EurekaAppCache struct {
+	L    sync.RWMutex
+	Apps map[string]AppObject
+}
+
+// Save
 func (e *EurekaAppCache) Save(cfname string, info EurekaAppInfo) {
-	// 如果没有拿到新的实例列表,则保留旧的列表不动
 	if len(info.Instance) == 0 {
 		return
 	}
@@ -44,71 +43,27 @@ func (e *EurekaAppCache) Save(cfname string, info EurekaAppInfo) {
 		app.AddHost(schema, host, strconv.Itoa(port), ins.HealthCheckUrl)
 	}
 
-	defer e.L.Unlock()
 	e.L.Lock()
 	e.Apps[kname] = app
+	e.L.Unlock()
 }
 
-// ClearAdderss 清除应用下无用的地址
-// 慎用该方法
-// 该方法是为了保证本地缓存应用的健康情况
-// 所以使用时确保在服务端注册的应用的健康接口可以Get调通
-func (e *EurekaAppCache) ClearAdderss(name string) {
-	app, ok := e.Apps[name]
-	if !ok {
-		return
-	}
-
-	app.RefresHost()
-	defer e.L.Unlock()
-	e.L.Lock()
-	e.Apps[name] = app
+// ShowApps
+func (e *EurekaAppCache) ShowApps() {
+	e.L.RLock()
+	fmt.Printf("%v", globalEurekaAppCache.Apps)
+	e.L.RUnlock()
 }
 
-// ClearUseless 清除无效应用实例(健康接口不通)
-// 慎用该方法
-// 该方法是为了保证本地缓存应用的健康情况
-// 所以使用时确保在服务端注册的应用的健康接口可以Get调通
-func (e *EurekaAppCache) ClearUseless() {
-	app_ks := make([]string, len(e.Apps))
-	index := 0
-
-	for key := range e.Apps {
-		app_ks[index] = key
-		index += 1
-	}
-
-	for _, name := range app_ks {
-		e.ClearAdderss(name)
-	}
-}
-
-// GetAppUrl 获取一个应用的请求地址
-func GetAppUrl(cfname string, name string) (string, error) {
+// GetAnHost
+func (e *EurekaAppCache) GetAnHost(cfname string, name string) (AddressObject, error) {
 	name = strings.ToUpper(name)
 	cfname = strings.ToUpper(cfname)
 	kname := cfname + "_" + name
 
+	e.L.RLock()
 	app, ok := globalEurekaAppCache.Apps[kname]
-	if !ok {
-		return "", errors.New("Get app url failed with err: app (" + name + ") not found")
-	}
-
-	ul, err := app.GetAnUrl()
-	if err != nil {
-		return "", err
-	}
-
-	return ul, nil
-}
-
-// GetHost 获取一个应用实例的主机信息
-func GetAppHost(cfname string, name string) (AddressObject, error) {
-	name = strings.ToUpper(name)
-	cfname = strings.ToUpper(cfname)
-	kname := cfname + "_" + name
-
-	app, ok := globalEurekaAppCache.Apps[kname]
+	e.L.RUnlock()
 	if !ok {
 		return AddressObject{}, errors.New("Get app url failed with err: app (" + name + ") not found")
 	}
@@ -121,7 +76,61 @@ func GetAppHost(cfname string, name string) (AddressObject, error) {
 	return adr, nil
 }
 
-// ShowApps 展示已缓存的应用信息
+// GetAnUrl
+func (e *EurekaAppCache) GetAnUrl(cfname string, name string) (string, error) {
+	name = strings.ToUpper(name)
+	cfname = strings.ToUpper(cfname)
+	kname := cfname + "_" + name
+
+	e.L.RLock()
+	app, ok := globalEurekaAppCache.Apps[kname]
+	e.L.RUnlock()
+
+	if !ok {
+		return "", errors.New("Get app url failed with err: app (" + name + ") not found")
+	}
+
+	ul, err := app.GetAnUrl()
+	if err != nil {
+		ul = ""
+	}
+
+	return ul, err
+}
+
+// GetAllUrl
+func (e *EurekaAppCache) GetAllUrl(cfname string, name string) (string, error) {
+	name = strings.ToUpper(name)
+	cfname = strings.ToUpper(cfname)
+	kname := cfname + "_" + name
+
+	e.L.RLock()
+	app, ok := globalEurekaAppCache.Apps[kname]
+	e.L.RUnlock()
+
+	if !ok {
+		return "", errors.New("Get app url failed with err: app (" + name + ") not found")
+	}
+
+	ul, err := app.GetAnUrl()
+	if err != nil {
+		ul = ""
+	}
+
+	return ul, err
+}
+
+// GetAppUrl
+func GetAppUrl(cfname string, name string) (string, error) {
+	return globalEurekaAppCache.GetAnUrl(cfname, name)
+}
+
+// GetAppHost
+func GetAnHost(cfname string, name string) (AddressObject, error) {
+	return globalEurekaAppCache.GetAnHost(cfname, name)
+}
+
+// ShowApps
 func ShowApps() {
-	fmt.Printf("%v", globalEurekaAppCache.Apps)
+	globalEurekaAppCache.ShowApps()
 }

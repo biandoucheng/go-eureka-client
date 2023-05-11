@@ -12,7 +12,7 @@ func TestAddress(t *testing.T) {
 	fmt.Println("-----------服务地址测试----------------")
 	fmt.Println(addr.Check())
 	fmt.Println(addr.HealthUrl)
-	fmt.Println(addr.GetUrl())
+	fmt.Println(addr.Url())
 	fmt.Println(addr.AppName)
 }
 
@@ -23,7 +23,6 @@ func TestApp(t *testing.T) {
 	fmt.Println(app.Name)
 	fmt.Println(app.Hosts)
 	fmt.Println(app.GetAnUrl())
-	fmt.Println(app.HasActiveInstance())
 	fmt.Println(app.Hosts)
 }
 
@@ -93,7 +92,7 @@ func TestEurekaDeleteApp(t *testing.T) {
 	cnf.Apps = []string{"DEFAULT-EUREKA-APP0", "DEFAULT-EUREKA-APP1"}
 	cnf.InstanceIp = "127.0.0.1"
 	cnf.InstancePort = 8090
-	err := EurekaDelteApp(cnf.EurekaServerAddress, cnf.Authorization, cnf.AppName, cnf.Id())
+	err := EurekaDeleteApp(cnf.EurekaServerAddress, cnf.Authorization, cnf.AppName, cnf.Id())
 	fmt.Println("-----------Eureka删除应用测试----------------")
 	fmt.Println("删除应用错误信息 >>", err)
 }

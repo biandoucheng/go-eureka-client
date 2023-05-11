@@ -10,13 +10,13 @@ func init() {
 	rand.Seed(time.Now().UnixNano())
 }
 
-// AppObject 应用信息
+// AppObject
 type AppObject struct {
-	Name  string          //应用名称
-	Hosts []AddressObject //主机地址
+	Name  string
+	Hosts []AddressObject
 }
 
-// NewApp 实例化应用对象
+// NewApp
 func NewApp(name string) AppObject {
 	return AppObject{
 		Name:  name,
@@ -24,11 +24,10 @@ func NewApp(name string) AppObject {
 	}
 }
 
-// AddHost 添加主机实例
+// AddHost
 func (a *AppObject) AddHost(scheme, host, port, healthUrl string) bool {
 	addr := NewAddress(a.Name, scheme, host, port, healthUrl)
 
-	// 检测该地址是否已存在
 	for _, a_adr := range a.Hosts {
 		if a_adr.Equl(addr) {
 			return true
@@ -39,33 +38,38 @@ func (a *AppObject) AddHost(scheme, host, port, healthUrl string) bool {
 	return true
 }
 
-// HasInstance 判断该应用是否存在实例
-func (a *AppObject) HasInstance() bool {
+// HasHost
+func (a *AppObject) HasHost() bool {
 	return len(a.Hosts) > 0
 }
 
-// HasActiveInstance 判断该应用是否有确定健康的实例
-func (a *AppObject) HasActiveInstance() bool {
-	a.RefresHost()
-	return len(a.Hosts) > 0
+// GetAddresses
+func (a *AppObject) GetAddresses() []AddressObject {
+	return a.Hosts
 }
 
-// RefresHost 刷新应用的实例信息,去除不健康的主机信息
-func (a *AppObject) RefresHost() {
-	addrs := []AddressObject{}
-
-	for _, addr := range a.Hosts {
-		if !addr.Check() {
-			continue
-		}
-
-		addrs = append(addrs, addr)
+// RemoveUnhealthAddress
+func (a *AppObject) RemoveUnhealthAddress(addrs []AddressObject) {
+	if len(addrs) == 0 {
+		return
 	}
 
-	a.Hosts = addrs
+	unhealths := map[string]bool{}
+	for _, adr := range addrs {
+		unhealths[adr.Url()] = false
+	}
+
+	healths := []AddressObject{}
+	for _, adr := range a.Hosts {
+		if _, has := unhealths[adr.Url()]; !has {
+			healths = append(healths, adr)
+		}
+	}
+
+	a.Hosts = healths
 }
 
-// GetAnUrl 获取一个地址
+// GetAnUrl
 func (a *AppObject) GetAnUrl() (string, error) {
 	if len(a.Hosts) == 0 {
 		return "", errors.New("Get app(" + a.Name + ") address failed with err: no adders cached")
@@ -74,10 +78,24 @@ func (a *AppObject) GetAnUrl() (string, error) {
 	index := rand.Intn(len(a.Hosts))
 	addr := a.Hosts[index]
 
-	return addr.GetUrl(), nil
+	return addr.Url(), nil
 }
 
-// GetAnHost 获取一个主机信息
+// GetAllUrls
+func (a *AppObject) GetAllUrls() []string {
+	if len(a.Hosts) == 0 {
+		return []string{}
+	}
+
+	uls := []string{}
+	for _, adr := range a.Hosts {
+		uls = append(uls, adr.Url())
+	}
+
+	return uls
+}
+
+// GetAnHost
 func (a *AppObject) GetAnHost() (AddressObject, error) {
 	if len(a.Hosts) == 0 {
 		return AddressObject{}, errors.New("Get app(" + a.Name + ") address failed with err: no adders cached")

@@ -133,7 +133,7 @@ func delteOldApp(cnf EurekaClientConfig) {
 	app := info.Application
 
 	for _, ins := range app.Instance {
-		EurekaDelteApp(cnf.EurekaServerAddress, cnf.Authorization, cnf.AppName, ins.InstanceId)
+		EurekaDeleteApp(cnf.EurekaServerAddress, cnf.Authorization, cnf.AppName, ins.InstanceId)
 	}
 }
 

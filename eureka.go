@@ -222,8 +222,8 @@ func EurekaGetApp(ul, auth, name string) (AppResponse, error) {
 	return app, nil
 }
 
-// EurekaDelteApp 删除已注册的应用实例
-func EurekaDelteApp(ul, auth, name, id string) error {
+// EurekaDeleteApp 删除已注册的应用实例
+func EurekaDeleteApp(ul, auth, name, id string) error {
 	ul = strings.TrimRight(ul, "/") + "/apps/" + name + "/" + id
 
 	header := http.Header{}

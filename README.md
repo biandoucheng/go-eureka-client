@@ -14,7 +14,7 @@ Eureka客户端
 - EurekaRegist 注册应用
 - EurekaHeartBeat 心跳续约
 - EurekaGetApp 应用拉取
-- EurekaDelteApp 应用删除
+- EurekaDeleteApp 应用删除
 ## 逻辑流程
 - 初始化 EurekaClientConfig 配置信息
 - - EurekaServerAddress Eureka服务端地址
@@ -29,7 +29,7 @@ Eureka客户端
 - - AppRefreshSecs 所需应用列表的缓存刷新周期 秒
 - 删除删除一次的注册记录
 - - EurekaGetApp  获取上次注册的实例信息
-- - EurekaDelteApp 删除上次的注册记录
+- - EurekaDeleteApp 删除上次的注册记录
 - 注册本次服务
 - - EurekaRegist
 - 后台心跳续约

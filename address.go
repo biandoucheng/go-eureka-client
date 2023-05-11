@@ -4,16 +4,16 @@ import (
 	"strings"
 )
 
-// AddressObject 地址对象
+// AddressObject
 type AddressObject struct {
-	AppName   string // 应用名称
-	Scheme    string // 协议头
-	Host      string // 主机地址
-	Port      string // 服务端口
-	HealthUrl string // 健康接口地址
+	AppName   string
+	Scheme    string
+	Host      string
+	Port      string
+	HealthUrl string
 }
 
-// NewAddress 实例化一个地址对象
+// NewAddress
 func NewAddress(name, scheme, host, port, healthUrl string) AddressObject {
 	addr := AddressObject{
 		AppName:   name,
@@ -38,7 +38,7 @@ func NewAddress(name, scheme, host, port, healthUrl string) AddressObject {
 	return addr
 }
 
-// Check 检车主机是否可用
+// Check
 func (a *AddressObject) Check() bool {
 	resp, err := HttpGet(a.HealthUrl, nil, nil, 2)
 	if err != nil {
@@ -52,12 +52,12 @@ func (a *AddressObject) Check() bool {
 	return true
 }
 
-// Equl 检查两个地址是否一致
+// Equl
 func (a *AddressObject) Equl(addr AddressObject) bool {
 	return a.Host == addr.Host && a.Port == addr.Port
 }
 
-// GetUrl 获取完整的请求地址
-func (a *AddressObject) GetUrl() string {
+// Url
+func (a *AddressObject) Url() string {
 	return a.Scheme + "://" + a.Host + ":" + a.Port
 }
