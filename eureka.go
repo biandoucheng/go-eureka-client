@@ -9,6 +9,17 @@ import (
 	"strings"
 )
 
+// AppAllResponse Eureka响应所有应用信息
+type AppAllResponse struct {
+	Applications Applications `json:"applications"`
+}
+
+type Applications struct {
+	Versions__delta string          `json:"versions__delta"`
+	Apps__hashcode  string          `json:"apps__hashcode"`
+	Application     []EurekaAppInfo `json:"application"`
+}
+
 // AppResponse Eureka响应应用信息
 type AppResponse struct {
 	Application EurekaAppInfo `json:"application"`
@@ -220,6 +231,38 @@ func EurekaGetApp(ul, auth, name string) (AppResponse, error) {
 	}
 
 	return app, nil
+}
+
+// EurekaGetAppAll 拉取所有应用
+func EurekaGetAppAll(ul, auth string) (AppAllResponse, error) {
+	ul = strings.TrimRight(ul, "/") + "/apps/"
+	header := http.Header{}
+	header.Set("Authorization", auth)
+	header.Set("Content-type", "application/json")
+	header.Set("Accept", "application/json")
+
+	appAll := AppAllResponse{}
+
+	resp, err := HttpGet(ul, header, nil, 5)
+	if err != nil {
+		return appAll, errors.New("Eureka app get all failed with http err: " + err.Error())
+	}
+
+	if resp.StatusCode != 200 {
+		return appAll, errors.New("Eureka app get all failed with http code " + strconv.Itoa(resp.StatusCode) + " ul:" + ul)
+	}
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return appAll, errors.New("Eureka app get all failed with read err: " + err.Error() + " ul:" + ul)
+	}
+
+	err = json.Unmarshal(body, &appAll)
+	if err != nil {
+		return appAll, errors.New("Eureka app get all failed with json err: " + err.Error() + " ul:" + ul)
+	}
+
+	return appAll, nil
 }
 
 // EurekaDeleteApp 删除已注册的应用实例

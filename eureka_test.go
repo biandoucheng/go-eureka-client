@@ -69,7 +69,7 @@ func TestEurekaHeartBeat(t *testing.T) {
 	fmt.Println("续命错误信息 >>", err)
 }
 
-func TestEurekaApps(t *testing.T) {
+func TestEurekaApp(t *testing.T) {
 	cnf := NewEurekaConf("default")
 	cnf.AppName = "DEFAULT-EUREKA-APP8"
 	cnf.Authorization = "Basic cm9vdDpyb290"
@@ -82,6 +82,17 @@ func TestEurekaApps(t *testing.T) {
 	fmt.Println("拉取应用错误信息 >>", err)
 	res, _ := json.Marshal(resp)
 	fmt.Println("拉取应用信息 >>", string(res))
+}
+
+func TestEurekaAppAll(t *testing.T) {
+	cnf := NewEurekaConf("default")
+	cnf.Authorization = "Basic cm9vdDpyb290"
+	cnf.EurekaServerAddress = "http://127.0.0.1:8080"
+	fmt.Println("-----------Eureka拉取全量应用列表测试----------------")
+	resp, err := EurekaGetAppAll(cnf.EurekaServerAddress, cnf.Authorization)
+	fmt.Println("拉取全量应用错误信息 >>", err)
+	res, _ := json.Marshal(resp)
+	fmt.Println("拉取全量应用信息 >>", string(res))
 }
 
 func TestEurekaDeleteApp(t *testing.T) {

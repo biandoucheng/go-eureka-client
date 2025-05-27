@@ -16,9 +16,9 @@ func StartBatch(cnfs []EurekaClientConfig, debug bool) error {
 	for _, cnf := range cnfs {
 		eureka := NewEurekaAppInstance(cnf)
 
-		// 单机运行时清除其他旧应用
-		if cnf.StandAlone {
-			delteOldApp(cnf)
+		// 如果需要在启动时注册前去删除旧的注册信息则执行
+		if cnf.DropOldInstanceWhenStart {
+			DropOldInstance(cnf)
 		}
 
 		// 注册新的应用
@@ -61,8 +61,10 @@ func StartBatch(cnfs []EurekaClientConfig, debug bool) error {
 func Start(cnf EurekaClientConfig, debug bool) error {
 	eureka := NewEurekaAppInstance(cnf)
 
-	// 删除旧应用
-	delteOldApp(cnf)
+	// 如果需要在启动时注册前去删除旧的注册信息则执行
+	if cnf.DropOldInstanceWhenStart {
+		DropOldInstance(cnf)
+	}
 
 	// 注册新的应用
 	err := EurekaRegist(cnf.EurekaServerAddress, cnf.Authorization, eureka)
@@ -117,14 +119,14 @@ func StartForKeeper(cnf EurekaClientConfig, debug bool) {
 	}(cnf)
 }
 
-// 	批量仅维护应用列表而启动
+// 批量仅维护应用列表而启动
 func StartForKeeperBatch(cnfs []EurekaClientConfig, debug bool) {
 	// 批量应用列表维护
 	keepAppCacheBatch(cnfs, debug)
 }
 
 // delteOldApp 删除旧应用
-func delteOldApp(cnf EurekaClientConfig) {
+func DropOldInstance(cnf EurekaClientConfig) {
 	info, err := EurekaGetApp(cnf.EurekaServerAddress, cnf.Authorization, cnf.AppName)
 	if err != nil {
 		return
@@ -157,16 +159,29 @@ func keepMeAlive(cnf EurekaClientConfig, tm int64) error {
 
 // keepAppCache 应用列表维护
 func keepAppCache(cnf EurekaClientConfig, debug bool) {
-	for _, name := range cnf.Apps {
-		info, err := EurekaGetApp(cnf.EurekaServerAddress, cnf.Authorization, name)
+	if len(cnf.Apps) > 0 {
+		for _, name := range cnf.Apps {
+			info, err := EurekaGetApp(cnf.EurekaServerAddress, cnf.Authorization, name)
+			if err != nil {
+				if debug {
+					fmt.Println("Eureka Client EurekaGetApp error: " + err.Error())
+				}
+				continue
+			}
+
+			globalEurekaAppCache.Save(cnf.EurekaName, info.Application)
+		}
+	} else {
+		infos, err := EurekaGetAppAll(cnf.EurekaServerAddress, cnf.Authorization)
 		if err != nil {
 			if debug {
 				fmt.Println("Eureka Client EurekaGetApp error: " + err.Error())
 			}
-			continue
 		}
 
-		globalEurekaAppCache.Save(cnf.EurekaName, info.Application)
+		for _, info := range infos.Applications.Application {
+			globalEurekaAppCache.Save(cnf.EurekaName, info)
+		}
 	}
 }
 
