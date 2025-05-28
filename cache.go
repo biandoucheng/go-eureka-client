@@ -2,7 +2,7 @@ package goeurekaclient
 
 import (
 	"errors"
-	"fmt"
+	"log"
 	"strconv"
 	"strings"
 	"sync"
@@ -51,7 +51,7 @@ func (e *EurekaAppCache) Save(cfname string, info EurekaAppInfo) {
 // ShowApps
 func (e *EurekaAppCache) ShowApps() {
 	e.L.RLock()
-	fmt.Printf("%v", globalEurekaAppCache.Apps)
+	log.Printf("apps: %+v \n", globalEurekaAppCache.Apps)
 	e.L.RUnlock()
 }
 

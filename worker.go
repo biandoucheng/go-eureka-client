@@ -1,9 +1,10 @@
 package goeurekaclient
 
 import (
-	"fmt"
 	"sync"
 	"time"
+
+	"log"
 )
 
 var (
@@ -25,7 +26,7 @@ func StartBatch(cnfs []EurekaClientConfig, debug bool) error {
 		err := EurekaRegist(cnf.EurekaServerAddress, cnf.Authorization, eureka)
 		if err != nil {
 			if debug {
-				fmt.Println("Eureka Client StartBatch error: " + err.Error())
+				log.Printf("Eureka Client StartBatch error: %s", err.Error())
 			}
 			return err
 		}
@@ -70,7 +71,7 @@ func Start(cnf EurekaClientConfig, debug bool) error {
 	err := EurekaRegist(cnf.EurekaServerAddress, cnf.Authorization, eureka)
 	if err != nil {
 		if debug {
-			fmt.Println("Eureka Client Start error: " + err.Error())
+			log.Printf("Eureka Client Start error: %s", err.Error())
 		}
 		return err
 	}
@@ -164,7 +165,7 @@ func keepAppCache(cnf EurekaClientConfig, debug bool) {
 			info, err := EurekaGetApp(cnf.EurekaServerAddress, cnf.Authorization, name)
 			if err != nil {
 				if debug {
-					fmt.Println("Eureka Client EurekaGetApp error: " + err.Error())
+					log.Printf("Eureka Client EurekaGetApp error: %s", err.Error())
 				}
 				continue
 			}
@@ -175,7 +176,7 @@ func keepAppCache(cnf EurekaClientConfig, debug bool) {
 		infos, err := EurekaGetAppAll(cnf.EurekaServerAddress, cnf.Authorization)
 		if err != nil {
 			if debug {
-				fmt.Println("Eureka Client EurekaGetApp error: " + err.Error())
+				log.Printf("Eureka Client EurekaGetApp error: %s", err.Error())
 			}
 		}
 
