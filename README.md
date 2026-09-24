@@ -14,7 +14,25 @@ Eureka客户端
 - EurekaRegist 注册应用
 - EurekaHeartBeat 心跳续约
 - EurekaGetApp 应用拉取
+- EurekaGetAppAll 拉取全部应用
 - EurekaDeleteApp 应用删除
+- GetAllUrls 获取应用的全部服务地址
+- SetHTTPTransport 设置Eureka客户端使用的HTTP传输器；传入nil恢复默认传输器
+
+### 自定义HTTP传输器
+
+客户端默认使用保留原有连接池、拨号和超时配置的HTTP传输器，并默认校验TLS证书。如果需要配置HTTPS证书、代理、连接池或其他传输参数，可以在启动Eureka客户端前传入自定义传输器：
+
+```go
+transport := &http.Transport{
+    TLSClientConfig: &tls.Config{
+        MinVersion: tls.VersionTLS12,
+    },
+}
+goeurekaclient.SetHTTPTransport(transport)
+```
+
+`SetHTTPTransport` 接受 `http.RoundTripper`，传入 `nil` 时恢复为库默认传输器。
 ## 逻辑流程
 - 初始化 EurekaClientConfig 配置信息
 - - EurekaServerAddress Eureka服务端地址

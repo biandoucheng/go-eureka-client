@@ -3,7 +3,7 @@ package goeurekaclient
 import (
 	"encoding/json"
 	"errors"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"strconv"
 	"strings"
@@ -172,11 +172,12 @@ func EurekaRegist(ul string, auth string, e EurekaAppInstance) error {
 	ul = strings.TrimRight(ul, "/") + "/apps/" + e.App
 	resp, err := HttpPost(ul, header, body, 3)
 	if err != nil {
-		return errors.New("Eureka regist failed with http err: " + err.Error() + " ul:" + ul)
+		return errors.New("Eureka regist failed with HTTP request error")
 	}
+	defer resp.Body.Close()
 
 	if resp.StatusCode != 204 {
-		return errors.New("Eureka regist failed with http code " + strconv.Itoa(resp.StatusCode) + " ul:" + ul)
+		return errors.New("Eureka regist failed with http code " + strconv.Itoa(resp.StatusCode))
 	}
 
 	return nil
@@ -191,11 +192,12 @@ func EurekaHeartBeat(ul, auth, name, id string) error {
 
 	resp, err := HttpPut(ul, header, nil, 2)
 	if err != nil {
-		return errors.New("Eureka heartbeat failed with http err: " + err.Error() + " ul:" + ul)
+		return errors.New("Eureka heartbeat failed with HTTP request error")
 	}
+	defer resp.Body.Close()
 
 	if resp.StatusCode != 200 {
-		return errors.New("Eureka heartbeat failed with http code: " + strconv.Itoa(resp.StatusCode) + " ul:" + ul)
+		return errors.New("Eureka heartbeat failed with http code: " + strconv.Itoa(resp.StatusCode))
 	}
 
 	return nil
@@ -213,21 +215,22 @@ func EurekaGetApp(ul, auth, name string) (AppResponse, error) {
 
 	resp, err := HttpGet(ul, header, nil, 3)
 	if err != nil {
-		return app, errors.New("Eureka app get failed with http err: " + err.Error())
+		return app, errors.New("Eureka app get failed with HTTP request error")
 	}
+	defer resp.Body.Close()
 
 	if resp.StatusCode != 200 {
-		return app, errors.New("Eureka app get failed with http code " + strconv.Itoa(resp.StatusCode) + " ul:" + ul)
+		return app, errors.New("Eureka app get failed with http code " + strconv.Itoa(resp.StatusCode))
 	}
 
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return app, errors.New("Eureka app get failed with read err: " + err.Error() + " ul:" + ul)
+		return app, errors.New("Eureka app get failed with read err: " + err.Error())
 	}
 
 	err = json.Unmarshal(body, &app)
 	if err != nil {
-		return app, errors.New("Eureka app get failed with json err: " + err.Error() + " ul:" + ul)
+		return app, errors.New("Eureka app get failed with json err: " + err.Error())
 	}
 
 	return app, nil
@@ -245,21 +248,22 @@ func EurekaGetAppAll(ul, auth string) (AppAllResponse, error) {
 
 	resp, err := HttpGet(ul, header, nil, 5)
 	if err != nil {
-		return appAll, errors.New("Eureka app get all failed with http err: " + err.Error())
+		return appAll, errors.New("Eureka app get all failed with HTTP request error")
 	}
+	defer resp.Body.Close()
 
 	if resp.StatusCode != 200 {
-		return appAll, errors.New("Eureka app get all failed with http code " + strconv.Itoa(resp.StatusCode) + " ul:" + ul)
+		return appAll, errors.New("Eureka app get all failed with http code " + strconv.Itoa(resp.StatusCode))
 	}
 
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return appAll, errors.New("Eureka app get all failed with read err: " + err.Error() + " ul:" + ul)
+		return appAll, errors.New("Eureka app get all failed with read err: " + err.Error())
 	}
 
 	err = json.Unmarshal(body, &appAll)
 	if err != nil {
-		return appAll, errors.New("Eureka app get all failed with json err: " + err.Error() + " ul:" + ul)
+		return appAll, errors.New("Eureka app get all failed with json err: " + err.Error())
 	}
 
 	return appAll, nil
@@ -274,11 +278,12 @@ func EurekaDeleteApp(ul, auth, name, id string) error {
 
 	resp, err := HttpDelete(ul, header, nil, 2)
 	if err != nil {
-		return errors.New("Eureka detete app failed with http err: " + err.Error() + " ul:" + ul)
+		return errors.New("Eureka delete app failed with HTTP request error")
 	}
+	defer resp.Body.Close()
 
 	if resp.StatusCode != 200 {
-		return errors.New("Eureka detete app failed with http code: " + strconv.Itoa(resp.StatusCode) + " ul:" + ul)
+		return errors.New("Eureka detete app failed with http code: " + strconv.Itoa(resp.StatusCode))
 	}
 
 	return nil

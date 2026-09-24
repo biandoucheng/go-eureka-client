@@ -51,7 +51,7 @@ func (e *EurekaAppCache) Save(cfname string, info EurekaAppInfo) {
 // ShowApps
 func (e *EurekaAppCache) ShowApps() {
 	e.L.RLock()
-	log.Printf("apps: %+v \n", globalEurekaAppCache.Apps)
+	log.Printf("apps: %+v \n", e.Apps)
 	e.L.RUnlock()
 }
 
@@ -62,7 +62,7 @@ func (e *EurekaAppCache) GetAnHost(cfname string, name string) (AddressObject, e
 	kname := cfname + "_" + name
 
 	e.L.RLock()
-	app, ok := globalEurekaAppCache.Apps[kname]
+	app, ok := e.Apps[kname]
 	e.L.RUnlock()
 	if !ok {
 		return AddressObject{}, errors.New("Get app url failed with err: app (" + name + ") not found")
@@ -83,7 +83,7 @@ func (e *EurekaAppCache) GetAnUrl(cfname string, name string) (string, error) {
 	kname := cfname + "_" + name
 
 	e.L.RLock()
-	app, ok := globalEurekaAppCache.Apps[kname]
+	app, ok := e.Apps[kname]
 	e.L.RUnlock()
 
 	if !ok {
@@ -98,31 +98,35 @@ func (e *EurekaAppCache) GetAnUrl(cfname string, name string) (string, error) {
 	return ul, err
 }
 
-// GetAllUrl
-func (e *EurekaAppCache) GetAllUrl(cfname string, name string) (string, error) {
+// GetAllUrls 获取应用的全部服务地址。
+func (e *EurekaAppCache) GetAllUrls(cfname string, name string) ([]string, error) {
 	name = strings.ToUpper(name)
 	cfname = strings.ToUpper(cfname)
 	kname := cfname + "_" + name
 
 	e.L.RLock()
-	app, ok := globalEurekaAppCache.Apps[kname]
+	app, ok := e.Apps[kname]
 	e.L.RUnlock()
 
 	if !ok {
-		return "", errors.New("Get app url failed with err: app (" + name + ") not found")
+		return nil, errors.New("Get app url failed with err: app (" + name + ") not found")
 	}
 
-	ul, err := app.GetAnUrl()
-	if err != nil {
-		ul = ""
+	if !app.HasHost() {
+		return nil, errors.New("Get app url failed with err: app (" + name + ") has no address")
 	}
 
-	return ul, err
+	return app.GetAllUrls(), nil
 }
 
 // GetAppUrl
 func GetAppUrl(cfname string, name string) (string, error) {
 	return globalEurekaAppCache.GetAnUrl(cfname, name)
+}
+
+// GetAllUrls 获取应用的全部服务地址。
+func GetAllUrls(cfname string, name string) ([]string, error) {
+	return globalEurekaAppCache.GetAllUrls(cfname, name)
 }
 
 // GetAppHost

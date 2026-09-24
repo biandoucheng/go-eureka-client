@@ -7,11 +7,6 @@ import (
 	"log"
 )
 
-var (
-	// 并发控制
-	ch = make(chan int, 10)
-)
-
 // StartBatch 批量启动
 func StartBatch(cnfs []EurekaClientConfig, debug bool) error {
 	for _, cnf := range cnfs {
@@ -190,13 +185,11 @@ func keepAppCache(cnf EurekaClientConfig, debug bool) {
 func keepAppCacheBatch(cnfs []EurekaClientConfig, debug bool) {
 	waitGroup := sync.WaitGroup{}
 	for _, cnf := range cnfs {
-		ch <- 1
 		waitGroup.Add(1)
-
-		go keepAppCache(cnf, debug)
-
-		waitGroup.Done()
-		<-ch
+		go func(config EurekaClientConfig) {
+			defer waitGroup.Done()
+			keepAppCache(config, debug)
+		}(cnf)
 	}
 	waitGroup.Wait()
 }

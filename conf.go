@@ -1,6 +1,7 @@
 package goeurekaclient
 
 import (
+	"errors"
 	"strconv"
 )
 
@@ -36,23 +37,33 @@ func (e *EurekaClientConfig) HostName() string {
 	return e.InstanceDomain
 }
 
-// RefreshLocalIp 刷新本地IP信息
-func (e *EurekaClientConfig) RefreshLocalIp() {
+// RefreshLocalIp 刷新本地IP信息并返回错误。
+func (e *EurekaClientConfig) RefreshLocalIp() error {
 	oip := e.InstanceIp
-	e.InstanceIp = GetInnerIp()
+	ip, err := GetInnerIp()
+	if err != nil {
+		return err
+	}
+	e.InstanceIp = ip
 	if len(e.InstanceDomain) == 0 || e.InstanceDomain == oip {
 		e.InstanceDomain = e.InstanceIp
 	}
+	return nil
 }
 
 // NewEurekaConf 实例化一个eureka客户端配置
-func NewEurekaConf(name string) EurekaClientConfig {
+func NewEurekaConf(name string) (EurekaClientConfig, error) {
+	ip, err := GetInnerIp()
+	if err != nil {
+		return EurekaClientConfig{}, errors.New("create Eureka config failed: " + err.Error())
+	}
+
 	return EurekaClientConfig{
 		EurekaName:             name,
 		RenewalIntervalInSecs:  20,
 		DurationInSecs:         40,
 		AppRefreshSecs:         30,
 		InstanceHealthCheckUrl: "/health",
-		InstanceIp:             GetInnerIp(),
-	}
+		InstanceIp:             ip,
+	}, nil
 }

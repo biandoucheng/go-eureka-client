@@ -44,6 +44,7 @@ func (a *AddressObject) Check() bool {
 	if err != nil {
 		return false
 	}
+	defer resp.Body.Close()
 
 	if resp.StatusCode != 200 && resp.StatusCode != 204 {
 		return false
@@ -54,7 +55,7 @@ func (a *AddressObject) Check() bool {
 
 // Equl
 func (a *AddressObject) Equl(addr AddressObject) bool {
-	return a.Host == addr.Host && a.Port == addr.Port
+	return strings.EqualFold(a.Scheme, addr.Scheme) && a.Host == addr.Host && a.Port == addr.Port
 }
 
 // Url

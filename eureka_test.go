@@ -7,6 +7,15 @@ import (
 	"time"
 )
 
+func newTestConfig(t *testing.T) EurekaClientConfig {
+	t.Helper()
+	cnf, err := NewEurekaConf("default")
+	if err != nil {
+		t.Fatalf("NewEurekaConf() error = %v", err)
+	}
+	return cnf
+}
+
 func TestAddress(t *testing.T) {
 	addr := NewAddress("TEST", "http", "127.0.0.1", "8080", "/health")
 	fmt.Println("-----------服务地址测试----------------")
@@ -27,7 +36,7 @@ func TestApp(t *testing.T) {
 }
 
 func TestEurekaConf(t *testing.T) {
-	cnf := NewEurekaConf("default")
+	cnf := newTestConfig(t)
 	cnf.EurekaServerAddress = "http://127.0.0.1:8080"
 	cnf.Apps = []string{"DEFAULT-EUREKA-APP0", "DEFAULT-EUREKA-APP1"}
 	cnf.InstanceIp = "127.0.0.1"
@@ -39,7 +48,7 @@ func TestEurekaConf(t *testing.T) {
 }
 
 func TestEurekaRegister(t *testing.T) {
-	cnf := NewEurekaConf("default")
+	cnf := newTestConfig(t)
 	cnf.AppName = "DEFAULT-EUREKA-APP8"
 	cnf.Authorization = "Basic cm9vdDpyb290"
 	cnf.EurekaServerAddress = "http://127.0.0.1:8080"
@@ -54,7 +63,7 @@ func TestEurekaRegister(t *testing.T) {
 }
 
 func TestEurekaHeartBeat(t *testing.T) {
-	cnf := NewEurekaConf("default")
+	cnf := newTestConfig(t)
 	cnf.AppName = "DEFAULT-EUREKA-APP8"
 	cnf.Authorization = "Basic cm9vdDpyb290"
 	cnf.EurekaServerAddress = "http://127.0.0.1:8080"
@@ -70,7 +79,7 @@ func TestEurekaHeartBeat(t *testing.T) {
 }
 
 func TestEurekaApp(t *testing.T) {
-	cnf := NewEurekaConf("default")
+	cnf := newTestConfig(t)
 	cnf.AppName = "DEFAULT-EUREKA-APP8"
 	cnf.Authorization = "Basic cm9vdDpyb290"
 	cnf.EurekaServerAddress = "http://127.0.0.1:8080"
@@ -85,7 +94,7 @@ func TestEurekaApp(t *testing.T) {
 }
 
 func TestEurekaAppAll(t *testing.T) {
-	cnf := NewEurekaConf("default")
+	cnf := newTestConfig(t)
 	cnf.Authorization = "Basic cm9vdDpyb290"
 	cnf.EurekaServerAddress = "http://127.0.0.1:8080"
 	fmt.Println("-----------Eureka拉取全量应用列表测试----------------")
@@ -96,7 +105,7 @@ func TestEurekaAppAll(t *testing.T) {
 }
 
 func TestEurekaDeleteApp(t *testing.T) {
-	cnf := NewEurekaConf("default")
+	cnf := newTestConfig(t)
 	cnf.AppName = "DEFAULT-EUREKA-APP8"
 	cnf.Authorization = "Basic cm9vdDpyb290"
 	cnf.EurekaServerAddress = "http://127.0.0.1:8080"
@@ -109,7 +118,7 @@ func TestEurekaDeleteApp(t *testing.T) {
 }
 
 func TestEurekaAppsCache(t *testing.T) {
-	cnf := NewEurekaConf("default")
+	cnf := newTestConfig(t)
 	cnf.AppName = "DEFAULT-EUREKA-APP8"
 	cnf.Authorization = "Basic cm9vdDpyb290"
 	cnf.EurekaServerAddress = "http://127.0.0.1:8080"
@@ -130,7 +139,7 @@ func TestEurekaAppsCache(t *testing.T) {
 }
 
 func TestEurekaBatch(t *testing.T) {
-	cnf := NewEurekaConf("default")
+	cnf := newTestConfig(t)
 	cnf.AppName = "DEFAULT-EUREKA-APP9"
 	cnf.Authorization = "Basic cm9vdDpyb290"
 	cnf.EurekaServerAddress = "http://127.0.0.1:8080"
