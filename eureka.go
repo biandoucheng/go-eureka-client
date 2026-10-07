@@ -3,6 +3,7 @@ package goeurekaclient
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"strconv"
@@ -172,7 +173,7 @@ func EurekaRegist(ul string, auth string, e EurekaAppInstance) error {
 	ul = strings.TrimRight(ul, "/") + "/apps/" + e.App
 	resp, err := HttpPost(ul, header, body, 3)
 	if err != nil {
-		return errors.New("Eureka regist failed with HTTP request error")
+		return fmt.Errorf("Eureka regist failed with HTTP request error: %w", err)
 	}
 	defer resp.Body.Close()
 
@@ -192,7 +193,7 @@ func EurekaHeartBeat(ul, auth, name, id string) error {
 
 	resp, err := HttpPut(ul, header, nil, 2)
 	if err != nil {
-		return errors.New("Eureka heartbeat failed with HTTP request error")
+		return fmt.Errorf("Eureka heartbeat failed with HTTP request error: %w", err)
 	}
 	defer resp.Body.Close()
 
@@ -215,7 +216,7 @@ func EurekaGetApp(ul, auth, name string) (AppResponse, error) {
 
 	resp, err := HttpGet(ul, header, nil, 3)
 	if err != nil {
-		return app, errors.New("Eureka app get failed with HTTP request error")
+		return app, fmt.Errorf("Eureka app get failed with HTTP request error: %w", err)
 	}
 	defer resp.Body.Close()
 
@@ -248,7 +249,7 @@ func EurekaGetAppAll(ul, auth string) (AppAllResponse, error) {
 
 	resp, err := HttpGet(ul, header, nil, 5)
 	if err != nil {
-		return appAll, errors.New("Eureka app get all failed with HTTP request error")
+		return appAll, fmt.Errorf("Eureka app get all failed with HTTP request error: %w", err)
 	}
 	defer resp.Body.Close()
 
@@ -278,12 +279,12 @@ func EurekaDeleteApp(ul, auth, name, id string) error {
 
 	resp, err := HttpDelete(ul, header, nil, 2)
 	if err != nil {
-		return errors.New("Eureka delete app failed with HTTP request error")
+		return fmt.Errorf("Eureka delete app failed with HTTP request error: %w", err)
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != 200 {
-		return errors.New("Eureka detete app failed with http code: " + strconv.Itoa(resp.StatusCode))
+		return errors.New("Eureka delete app failed with http code: " + strconv.Itoa(resp.StatusCode))
 	}
 
 	return nil
